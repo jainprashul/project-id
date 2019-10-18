@@ -19,7 +19,7 @@ import {
 import db from "../db/pouch";
 
 const UserList = props => {
-  const reader = new FileReader();
+  // const reader = new FileReader();
   const [Faces, setFaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +43,6 @@ const UserList = props => {
     // const url = 'https://6faf9433-7e87-4b9e-9427-5ff48dc41bdf-bluemix:71d8405657a9a3edb62424bb48b0cfaad7d11c4e68eac6a44d99f0f0f4523201@'
     const url = `https://${userName}:${key}@6faf9433-7e87-4b9e-9427-5ff48dc41bdf-bluemix.cloudantnosqldb.appdomain.cloud/${database}`;
     console.log(url);
-
     db.sync(url, {
       live: true,
       retry: true
@@ -58,13 +57,12 @@ const UserList = props => {
     await db.allDocs(
       { include_docs: true, descending: true, attachments: true },
       (err, doc) => {
-        console.log(doc.rows);
+        // console.log(doc.rows);
         setFaces(doc.rows);
 
-        setLoading(false);
       }
     );
-
+    setLoading(false);    
     console.log("done");
   };
 
@@ -90,9 +88,6 @@ const UserList = props => {
                   href={`/dashboard/users/${i}`}
                   onClick={() => {
                     item.doc.id = i;
-                    {
-                      /* item.doc.photo = imgUrl */
-                    }
                     localStorage.setItem("data", JSON.stringify(item.doc));
                     console.log("stored item ", i);
                   }}

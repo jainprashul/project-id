@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
 import { IonPage, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonInput, IonItem, IonLabel, IonButton } from '@ionic/react'
 import db from '../db/pouch'
-import { async } from 'q'
+import imageCompression from 'browser-image-compression';
 
 const NewUser = ({ history }) => {
 
-    const reader = new FileReader()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [position, setPosition] = useState('')
     const [photo, setPhoto] = useState()
+    const [submiting, setsubmiting] = useState(false)
 
     const submitData = async (e)  => {
         e.preventDefault()
        
+        setsubmiting(true)
 
         let newData = {
             _id: 'user:' + Date.now().toString(),
@@ -35,7 +36,7 @@ const NewUser = ({ history }) => {
             } else {
                 console.log('Saved ' + res);
                 history.push('/dashboard')
-
+                setsubmiting(false)
             }
         })
 
@@ -71,13 +72,34 @@ const NewUser = ({ history }) => {
                     </IonItem>
                     <IonItem>
                         <IonLabel position="stacked" >User Profile</IonLabel>
-                        <IonInput type="file" accept="image/*" onIonChange={(e) => {
-                            console.log(e.target.children[0].files[0]);
-                            setPhoto(e.target.children[0].files[0])
+                        <IonInput type="file" accept="image/*" onIonChange={ async (e)  => {
+                            const img = e.target.children[0].files[0]
+                            console.log(img);
+                            console.log(`File size ${img.size / 1024 } Kb`); // smaller than maxSizeMB
+
+                            try {
+                                const resImg = await imageCompression(img, {
+                                    maxSizeMB: 0.2,
+                                    maxWidthOrHeight: 1366,
+                                    useWebWorker: true
+                                })
+                                console.log(resImg);
+                                console.log(`File size ${resImg.size / 1024} Kb`); // smaller than maxSizeMB
+
+                                setPhoto(resImg)
+
+                                
+
+                            }
+
+                            catch (e) {
+                                console.error(e);
+                            }
+                            
                         }}></IonInput>
                     </IonItem>
 
-                    <IonButton type='submit' color='primary'>Submit</IonButton>
+                    <IonButton type='submit' id='formSubmit' disabled={submiting} color='primary'>Submit</IonButton>
                 </form>
 
 
